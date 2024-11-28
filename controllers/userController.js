@@ -1,5 +1,8 @@
 const USER = require("../models/user");
-const { sendWelcomeEmail, sendResetPasswordEmail} = require("../emails/sendMail");
+const {
+  sendWelcomeEmail,
+  sendResetPasswordEmail,
+} = require("../emails/sendMail");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -30,7 +33,7 @@ const registerUser = async (req, res) => {
       password,
     });
 
-    const clientUrl = `${process.env.FRONTEND_URL}`/login;
+    const clientUrl = `${process.env.FRONTEND_URL}/login`;
     try {
       await sendWelcomeEmail({
         email: user.email,
@@ -90,48 +93,52 @@ const loginUser = async (req, res) => {
 };
 
 const forgotPassword = async (req, res) => {
- const {email} = req.body 
- if(!email) {
-    return res.status(400).json
-    ({success: false, message: 'Please Provide Email'})
- }
- // check if user exists
- const user = await USER.findOne ({email})
- if (!user){
-    return res.status(404).json({success: false, message: 'User not found'})
- }
- // generate resetToken
- const resetToken = jwt.sign({id:user._id}, process.env.JWT_SECRET,{
-    expiresIn: '15m'
- })
- // save the reset token and its expiry in the data base
- try {
-    user.resetToken = resetToken,
-    user.resetTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
-    await user.save()
-     // create reset link for the frontend 
- const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token{resetToken}`
- // send email to user
- try {
-    await sendResetPasswordEmail ({
+  const { email } = req.body;
+  if (!email) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Please Provide Email" });
+  }
+  // check if user exists
+  const user = await USER.findOne({ email });
+  if (!user) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+  // generate resetToken
+  const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
+  // save the reset token and its expiry in the data base
+  try {
+    (user.resetToken = resetToken),
+      (user.resetTokenExpiry = Date.now() + 15 * 60 * 1000); // 15 minutes
+    await user.save();
+    // create reset link for the frontend
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token{resetToken}`;
+    // send email to user
+    try {
+      await sendResetPasswordEmail({
         email: user.email,
         fullName: user.fullName,
         resetUrl,
+      });
+    } catch (error) {
+      console.log("error sending email");
+    }
+    res.status(200).json({
+      success: true,
+      message: "Password reset link sent to your mail",
+      resetToken,
     });
- }catch (error){
-    console.log("error sending email");
-    
- }
-res.status(200).json({
-    success: true,
-    message:"Password reset link sent to your mail",
-    resetToken,
-})
-}
- catch (error) {
-res.status(400).json({success: false, message: 'something went wrong', error: error.message})
- }
-
+  } catch (error) {
+    res
+      .status(400)
+      .json({
+        success: false,
+        message: "something went wrong",
+        error: error.message,
+      });
+  }
 };
 const resetPassword = async (req, res) => {
   const { newPassword, token } = req.body;
@@ -148,7 +155,7 @@ const resetPassword = async (req, res) => {
     const user = await USER.findOne({
       _id: decoded.id,
       resetToken: token,
-    //   lt lte gt gte eq
+      //   lt lte gt gte eq
       resetTokenExpiry: { $gt: Date.now() },
     });
 
