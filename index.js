@@ -5,9 +5,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const userRouter = require("./routes/userRoute");
 const cors = require("cors");
+const fileupload = require("express-fileupload");
+const cloudinary = require('cloudinary').v2
+
+const eventRouter = require("./routes/eventRouter");
+
+// cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET // Click 'View API Keys' above to copy your API secret
+});
 
 //  middlewares
-app.use(express.json());
+app.use(fileupload({ useTempFiles: true })); // allows use to have acess to files
+app.use(express.json()); // allows use to have acess to body
 app.use(cors());
 
 // routes
@@ -16,6 +28,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", userRouter);
+app.use("/api/v1/events", eventRouter);
+
 
 // error routes
 app.use((req, res) => {
