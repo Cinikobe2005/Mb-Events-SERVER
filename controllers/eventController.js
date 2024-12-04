@@ -4,7 +4,7 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 
 const createEvents = async (req, res) => {
-  const { userId } = req.userId;
+  const { userId } = req.user;
   const {
     date,
     title,
