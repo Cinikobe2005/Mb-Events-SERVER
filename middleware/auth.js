@@ -12,6 +12,7 @@ const auth = async (req, res, next) => {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
+
     if (!payload) {
       return res.status(401).json({
         success: false,
@@ -22,6 +23,7 @@ const auth = async (req, res, next) => {
       userId: payload.userId,
       email: payload.email,
     };
+
     next();
   } catch (error) {
     console.log(error);

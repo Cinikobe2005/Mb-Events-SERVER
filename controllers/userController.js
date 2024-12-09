@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 
 const generateToken = ({ userId, email }) => {
   const token = jwt.sign({ userId, email }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
+    expiresIn: "3d",
   });
   return token;
 };
@@ -131,13 +131,11 @@ const forgotPassword = async (req, res) => {
       resetToken,
     });
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        success: false,
-        message: "something went wrong",
-        error: error.message,
-      });
+    res.status(400).json({
+      success: false,
+      message: "something went wrong",
+      error: error.message,
+    });
   }
 };
 const resetPassword = async (req, res) => {
